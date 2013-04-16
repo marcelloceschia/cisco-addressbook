@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /cisco-addressbook.git/
+
+RewriteRule ^(.[^/-]+)/(.[^/-]+)/?$ 		index.php?name=$1&action=$2 [QSA]
+RewriteRule ^(.[^/-]+)/(.[^/-]+)/(.[^/]+)$ 	index.php?name=$1&action=$2&entry=$3 [QSA]
+RewriteRule ^(.[^/-]+)/(.[^/-]+)/(\d+)$ 	index.php?name=$1&action=$2&offset=$3 [QSA]
+RewriteRule ^(.[^/-]+)/(.[^/-]+)/(\d+)/(\d+)$ 	index.php?name=$1&action=$2&offset=$3&limit=$4 [QSA]
