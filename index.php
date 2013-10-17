@@ -1,6 +1,7 @@
 <?php
 $baseURI = "http://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME'])."/";
 $deviceMapping = array();
+$enableCache = false;
 include("config.php");
 require_once( "class/CiscoAddressbook.class.php");
 require_once( "class/Backend.class.php");
@@ -62,7 +63,7 @@ $id = isset($_REQUEST['id'])?$_REQUEST['id']:null;
 $do = isset($_REQUEST['action'])?$_REQUEST['action']:null;
 
 /* if cache available use cached version and exit */
-if ($data = $pbcache->start(md5( serialize($_REQUEST) ), false, false)) {
+if ($enableCache && $data = $pbcache->start(md5( serialize($_REQUEST) ), false, false)) {
         header("Content-Type: text/xml; charset=ISO-8859-1");
         echo mb_convert_encoding(encode($data) , "ISO-8859-1", "UTF-8");
         die();
@@ -74,10 +75,12 @@ header("Content-Type: text/xml; charset=ISO-8859-1");
 if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	
 	$deviceName = $_REQUEST['name'];
-	set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__)."/backend/".$deviceMapping[ $_REQUEST['name'] ]['backend']."/");
+	$backendName = $deviceMapping[ $_REQUEST['name'] ]['backend'];
+	$backendName = strtolower($backendName);
+	set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__)."/backend/".$backendName."/");
 	
 	try{
-		$reflect = new ReflectionClass($deviceMapping[ $_REQUEST['name'] ]['backend']);
+		$reflect = new ReflectionClass( $backendName );
 	} catch(ReflectionException $re){
 		die('pms does not exist');
 	}
@@ -227,8 +230,10 @@ switch($do){
 		echo $xml;
 	break;
 }
-$pbcache->end();
 
+if ($enableCache){
+	$pbcache->end();
+}
 
 function encode($str){
 	return str_replace(array("ß","Ä", "Ö", "Ü","ä","ö","ü"), array("&#223;","&#196;","&#214;","&#220;","&#228;","&#246;","&#252;"), $str);  
