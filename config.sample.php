@@ -1,4 +1,6 @@
 <?php
+$enableCache = false;
+
 // Device Mappings Examples
 
 // Google 
