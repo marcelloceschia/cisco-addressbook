@@ -37,22 +37,22 @@ class CardDAV implements Backend{
 	function getEntries($offset, $limit = null){
 $xmldata = <<<XMLDATA
 <?xml version="1.0" encoding="utf-8" ?>
-<C:addressbook-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
-  <D:prop>
-    <D:getetag/>
-    <C:address-data>
-      <C:prop name="UID"/>
-      <C:prop name="FN"/>
-    </C:address-data>
-  </D:prop>
-</C:addressbook-query>
+<D:propfind xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
+	<D:prop>
+		<D:getetag/>
+	    <C:address-data>
+	      <C:prop name="UID"/>
+	      <C:prop name="FN"/>
+	    </C:address-data>
+	</D:prop>
+</D:propfind>
 XMLDATA;
-
 		/* get entries with FN */
-		$response = $this->query($this->uri, 'REPORT', $xmldata, "text/xml; charset=\"utf-8\"");
+		$response = $this->query($this->uri, 'PROPFIND', $xmldata, "text/xml; charset=\"utf-8\"");
+
 		if($response !== false){
 			return $this->parseListResponse($response);
-		}
+		} 
 
 		return $response;
 	}
@@ -80,7 +80,7 @@ XMLDATA;
 		$data = str_replace("%search%", $id, $xmlsearch);
 
 		/* get entries with FN */
-		$response = $this->query($this->uri, 'REPORT', $data, "text/xml; charset=\"utf-8\"");
+		$response = $this->query($this->uri, 'REPORT', $data, "text/xml; charset=\"utf-8\"", array('Depth: 1') );
 		if($response !== false){
 			return $this->parseEntryResponse($response);
 		}
@@ -146,7 +146,7 @@ XMLDATA;
 		$data = str_replace("%search%", str_replace(" ", "", $number), $xmlsearch);
 
 		/* get entries with FN */
-		$response = $this->query($this->uri, 'REPORT', $data, "text/xml; charset=\"utf-8\"");
+		$response = $this->query($this->uri, 'REPORT', $data, "text/xml; charset=\"utf-8\"", array('Depth: 1') );
 		if($response !== false){
 			return $this->parseListResponse($response);
 		}
@@ -164,7 +164,7 @@ XMLDATA;
 	 * @param string $content_type set content-type
 	 * @return string CardDAV xml-response
 	 */
-	private function query($url, $method, $content = null, $content_type = null){
+	private function query($url, $method, $content = null, $content_type = null, $headers = null){
 		if($url === null){
 			throw new Exception("No uri specified for carddav backend! Please add an uri entry to the device mapping configuration.");
 		}
@@ -186,8 +186,11 @@ XMLDATA;
 		if ($content_type !== null){
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: '.$content_type));
 		}
+		if ($headers !== null){
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
+		}
 
-		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		curl_setopt($ch, CURLOPT_USERPWD, $this->username.":".$this->password);
 
 
@@ -223,10 +226,10 @@ XMLDATA;
 
 		foreach($xml->xpath('//d:response/d:propstat/d:prop/c:address-data') as $data) {
 
-			preg_match_all("/FN:([^\\n]*)/s", (string)$data, $result);
+			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/", (string)$data, $result);
 			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
-			
-			$item = new PhonebookEntry($uid[1][0], $result[1][0]);//$this->createPhonebookEntry($contacts[$i]);
+			//print_r($result);
+			$item = new PhonebookEntry($uid[1][0], $result['CONTENT'][0]);//$this->createPhonebookEntry($contacts[$i]);
 			array_push($list, $item);
 		}
 
@@ -255,14 +258,15 @@ XMLDATA;
 
 		foreach($xml->xpath('//d:response/d:propstat/d:prop/c:address-data') as $data) {
 
-			preg_match_all("/FN:([^\\n]*)/s", (string)$data, $result);
+			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/s", (string)$data, $result);
 			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
-			preg_match_all('/^TEL;TYPE=(.[^:]*):(.*)$/msU', (string)$data, $tels);
+			//preg_match_all('/^TEL;TYPE=(.[^:]*):(.*)$/msU', (string)$data, $tels);
+			preg_match_all('/TEL(;(?<PARAM>[^=]+=[^=]+))?(TYPE=(?<TYPE>.[^:]*)):(?<CONTENT>[^\\n]*)$/msU', (string)$data, $tels);
 	
 			
-			$directory = new PhonebookContact( $uid[1][0] , (string)$result[1][0]);
+			$directory = new PhonebookContact( $uid[1][0] , (string)$result['CONTENT'][0]);
 			for($i=0; $i < count($tels[1]); $i++){	
-				$directory->addContactEntry($tels[1][$i], (string) $tels[2][$i]);
+				$directory->addContactEntry($tels['TYPE'][$i], (string) $tels['CONTENT'][$i]);
 			}
 		}
 		return $directory;
