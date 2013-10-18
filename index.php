@@ -158,8 +158,8 @@ switch($do){
 		if(isset($phonebookContactEntry)){
 			$contactEntries = array();
 			
-			foreach($phonebookContactEntry->getContactEntry() as $type => $value){
-				$e = new DirectoryEntry($type, $type, phoneNummerCorrect($value) );
+			foreach($phonebookContactEntry->getContactEntry() as $value){
+				$e = new DirectoryEntry($value['type'], $value['type'], phoneNummerCorrect($value['value']) );
 				array_push($contactEntries, $e);
 			}
 			

@@ -39,7 +39,7 @@ class PhonebookContact{
 	}
 	
 	function addContactEntry($type, $value){
-		$this->contactEntry[$type] = $value;
+		$this->contactEntry[] = array("type" => $type, "value" => $value);
 	}
 	
 	function getContactEntry(){
