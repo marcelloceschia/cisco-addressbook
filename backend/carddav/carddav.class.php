@@ -248,7 +248,7 @@ XMLDATA;
 	 */
 	private function parseEntryResponse($response, $include_vcards = true){
 		$list = array(); /* result list */
-		echo $response;
+// 		echo $response;
 
 		$xml = new SimpleXMLElement($response);
 		
