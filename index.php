@@ -160,9 +160,9 @@ switch($do){
 			}
 			//$ciscoIPPhoneDirectory->setPrompt($phonebookContactEntry->getName());
 
-			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey("Dial", "SoftKey:Dial", 1 ) );
-			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey("Exit", "SoftKey:Exit", 2 ) );
-			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey("Close", "Init:Services", 3 ) );
+			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#010#'), "SoftKey:Dial", 1 ) );
+			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 2 ) );
+			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#012#'), "Init:Services", 3 ) );
 			
 			$xml = $ciscoIPPhoneDirectory->toXML();
 			echo mb_convert_encoding(encode($xml) , "ISO-8859-1", "UTF-8");
@@ -177,7 +177,7 @@ switch($do){
 		$indexEntries->addDirectoryEntry( new MenuItem("002", $lang->getEntry('#004#'), $baseURI."".$deviceName."/search") );
 
 		$xml = $indexEntries->toXML();
-		echo mb_convert_encoding($xml , "ISO-8859-1", "UTF-8");
+		echo $xml;
 	break;
 	
 	case "listAll":
@@ -205,8 +205,8 @@ switch($do){
 			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Next", $baseURI."".$deviceName."/listAll/".($offset+$limit), 2 ) );
 		}
 		
-		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Show", "SoftKey:Select", 3 ) );
-		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Exit", "SoftKey:Exit", 4 ) );
+		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#013#'), "SoftKey:Select", 3 ) );
+		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 4 ) );
 		
 		$xml = $listEntries->toXML();
 		echo mb_convert_encoding(encode($xml) , "ISO-8859-1", "UTF-8");

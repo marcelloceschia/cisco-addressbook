@@ -18,7 +18,11 @@ class Language{
 		"#001#" => "Firstname",
 		"#002#" => "Lastname",
 		"#003#" => "List all entries",
-		"#004#" => "search",
+		"#004#" => "Search",
+		"#010#" => "Dial",
+		"#011#" => "Back",
+		"#012#" => "Close",
+		"#013#" => "Show",
 	);
 
 	public static function getLocal($lang = null){
@@ -48,6 +52,10 @@ class Language_DE extends Language{
 		"#002#" => "Nachname",
  		"#003#" => "Alle Einträge anzeigen",
 		"#004#" => "Suchen",
+		"#010#" => "Wählen",
+		"#011#" => "Zurück",
+		"#012#" => "Schließen",
+		"#013#" => "Anzeigen",
 	);
 
 	public function  __construct() { 
@@ -61,6 +69,10 @@ class Language_NL extends Language{
 		"#002#" => "Achternaam",
  		"#003#" => "Alle regels tonen",
 		"#004#" => "Zoeken",
+		"#010#" => "Bellen",
+		"#011#" => "Teruggaan",
+		"#012#" => "Sluiten",
+		"#013#" => "Tonen",
 	);
 
 	public function  __construct() { 
@@ -74,6 +86,10 @@ class Language_FR extends Language{
 		"#002#" => "Nom de familie",
  		"#003#" => "Toutes les entrées",
 		"#004#" => "Chercher",
+		"#010#" => "Composer",
+		"#011#" => "Reculer",
+		"#012#" => "Fermer",
+		"#013#" => "Montrer",
 	);
 
 	public function  __construct() { 
