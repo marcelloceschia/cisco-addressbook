@@ -1,3 +1,3 @@
 [submodule "class/Zend"]
 	path = class/Zend
-	url = git://github.com/dmelo/Zend-1.11.git
+	url = git://github.com/dmelo/Zend-1.11.git	

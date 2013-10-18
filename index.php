@@ -7,6 +7,7 @@ require_once( "class/CiscoAddressbook.class.php");
 require_once( "class/Backend.class.php");
 require_once( "class/Phonebook.class.php");
 require_once( "class/Language.class.php");
+require_once( "class/vCard/vCard.php");
 
 set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__)."/class/");
 require_once("Zend/Loader.php");

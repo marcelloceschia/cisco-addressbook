@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /cisco-addressbook.git/
+RewriteBase /cisco/
 
 RewriteRule ^(.[^/-]+)/(.[^/-]+)/?$ 		index.php?name=$1&action=$2 [QSA]
 RewriteRule ^(.[^/-]+)/(.[^/-]+)/(.[^/]+)$ 	index.php?name=$1&action=$2&entry=$3 [QSA]

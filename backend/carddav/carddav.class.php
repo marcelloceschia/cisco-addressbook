@@ -218,21 +218,27 @@ XMLDATA;
 
 		$xml = new SimpleXMLElement($response);
 		
-		$result = array();
-		$uid = array();
+// 		$result = array();
+// 		$uid = array();
 		
 		$xml->registerXPathNamespace('c', 'urn:ietf:params:xml:ns:carddav');
 		$xml->registerXPathNamespace('d', 'DAV:');
 
 		foreach($xml->xpath('//d:response/d:propstat/d:prop/c:address-data') as $data) {
+		
+			$vCard = new vCard(false, (string)$data);
 
-			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/", (string)$data, $result);
-			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
+// 			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/", (string)$data, $result);
+// 			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
+// 			
+// 			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
+// 			if (strlen($name) == 0){ continue; }
 			
-			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
+			
+			$name = implode(",", $vCard->FN);
 			if (strlen($name) == 0){ continue; }
 			
-			@$item = new PhonebookEntry($uid[1][0], $name);//$this->createPhonebookEntry($contacts[$i]);
+			@$item = new PhonebookEntry($vCard->UID[0], $name);//$this->createPhonebookEntry($contacts[$i]);
 			array_push($list, $item);
 		}
 
@@ -260,18 +266,23 @@ XMLDATA;
 		$xml->registerXPathNamespace('d', 'DAV:');
 
 		foreach($xml->xpath('//d:response/d:propstat/d:prop/c:address-data') as $data) {
-
-			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/s", (string)$data, $result);
-			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
-			//preg_match_all('/^TEL;TYPE=(.[^:]*):(.*)$/msU', (string)$data, $tels);
-			preg_match_all('/TEL(;(?<PARAM>[^=]+=[^=]+))*(;TYPE=(?<TYPE>.[^:]*))*:(?<CONTENT>[^\\n]*)$/msU', (string)$data, $tels);
+		
+			$vCard = new vCard(false, (string)$data);
+// 			print_r($vCard);
+// 			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/s", (string)$data, $result);
+// 			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
+// 			//preg_match_all('/^TEL;TYPE=(.[^:]*):(.*)$/msU', (string)$data, $tels);
+// 			preg_match_all('/TEL(;(?<PARAM>[^=]+=[^=]+))*(;TYPE=(?<TYPE>.[^:]*))*:(?<CONTENT>[^\\n]*)$/msU', (string)$data, $tels);
 	
-			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
+// 			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
+// 			if (strlen($name) == 0){ continue; }
+
+			$name = implode(",", $vCard->FN);
 			if (strlen($name) == 0){ continue; }
 			
-			$directory = new PhonebookContact( $uid[1][0] , $name);
-			for($i=0; $i < count($tels[1]); $i++){	
-				$directory->addContactEntry($tels['TYPE'][$i], (string) $tels['CONTENT'][$i]);
+			$directory = new PhonebookContact( $vCard->UID[0] , $name);
+			for($i=0; $i < count($vCard->TEL); $i++){	
+				$directory->addContactEntry($vCard->TEL[$i]['Type'][0], (string) $vCard->TEL[$i]['Value']);
 			}
 		}
 		return $directory;
