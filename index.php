@@ -2,6 +2,8 @@
 $baseURI = "http://".$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME'])."/";
 $deviceMapping = array();
 $enableCache = false;
+$deviceCharset= "utf-8";
+
 include("config.php");
 require_once( "class/CiscoAddressbook.class.php");
 require_once( "class/Backend.class.php");
@@ -36,7 +38,14 @@ function __autoload($class_name) {
 		}
 	}
 }
+if(isset($_SERVER['HTTP_ACCEPT_CHARSET'])){
+	$values = explode( ';', $_SERVER['HTTP_ACCEPT_CHARSET'] );
+	$values = explode( ',', $values[0] );
+	
+	$deviceCharset = $values[0];
+}
 
+/* caching part */
 mb_internal_encoding("UTF-8");
 $manager = new Zend_Cache_Manager;
 $pbCacheSettings = array(
@@ -62,6 +71,8 @@ if (!is_writable(dirname(__FILE__)."/cache/")) {
     echo $xml;
     die();
 }
+/* done - caching */
+
 
 $manager->setCacheTemplate('pbcache', $pbCacheSettings);
 $pbcache = $manager->getCache('pbcache');
@@ -74,13 +85,13 @@ $do = isset($_REQUEST['action'])?$_REQUEST['action']:null;
 
 /* if cache available use cached version and exit */
 if ($enableCache && $data = $pbcache->start(md5( serialize($_REQUEST) ), false, false)) {
-        header("Content-Type: text/xml; charset=ISO-8859-1");
-        echo mb_convert_encoding(encode($data) , "ISO-8859-1", "UTF-8");
+        header("Content-Type: text/xml; charset=".$deviceCharset);
+        echo mb_convert_encoding(encode($data) , $deviceCharset, "UTF-8");
         die();
 } 
 
 /* use device mapping to set account info */
-header("Content-Type: text/xml; charset=ISO-8859-1");
+header("Content-Type: text/xml; charset=".$deviceCharset);
 
 if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	
@@ -94,7 +105,7 @@ if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	} catch(ReflectionException $re){
 		$ciscoIPPhoneText = new CiscoIPPhoneText("missing backend", "The configured backend ".$backendName." does not exist.");
 		$xml = $ciscoIPPhoneText->toXML();
-		echo $xml;
+		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 		die();
 	}
 	
@@ -102,7 +113,7 @@ if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	if($reflect == null){
 		$ciscoIPPhoneText = new CiscoIPPhoneText("missing backend", "The configured backend ".$backendName." does not exist.");
 		$xml = $ciscoIPPhoneText->toXML();
-		echo $xml;
+		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 		die();
 	}
 	
@@ -136,7 +147,7 @@ if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	
 	$ciscoIPPhoneText = new CiscoIPPhoneText("missing device mapping", "This device does not have a valide configuration");
 	$xml = $ciscoIPPhoneText->toXML();
-	echo $xml;
+	echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	die();
 }
 
@@ -177,7 +188,7 @@ switch($do){
 		$indexEntries->addDirectoryEntry( new MenuItem("002", $lang->getEntry('#004#'), $baseURI."".$deviceName."/search") );
 
 		$xml = $indexEntries->toXML();
-		echo $xml;
+		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	break;
 	
 	case "listAll":
@@ -209,7 +220,7 @@ switch($do){
 		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 4 ) );
 		
 		$xml = $listEntries->toXML();
-		echo mb_convert_encoding(encode($xml) , "ISO-8859-1", "UTF-8");
+		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	break;
 	
 	case "search":
@@ -233,7 +244,7 @@ switch($do){
 		      }
 		      $xml = $listEntries->toXML();
 		}
-		echo mb_convert_encoding(encode($xml) , "ISO-8859-1", "UTF-8");
+		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	break;
 	
 	case "reverse":
