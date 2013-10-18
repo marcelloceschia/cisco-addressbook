@@ -52,7 +52,16 @@ $pbCacheSettings = array(
                           'cache_dir' => dirname(__FILE__)."/cache/",
                   ),
           )
-);          
+);
+
+/* check if cache directory is writeable */
+if (!is_writable(dirname(__FILE__)."/cache/")) {
+    $ciscoIPPhoneText = new CiscoIPPhoneText("Configuration", "The cache directory must be writeable");
+    $xml = $ciscoIPPhoneText->toXML();
+    echo $xml;
+    die();
+}
+
 $manager->setCacheTemplate('pbcache', $pbCacheSettings);
 $pbcache = $manager->getCache('pbcache');
 
