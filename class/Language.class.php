@@ -86,7 +86,7 @@ class Language_FR extends Language{
 		"#002#" => "Nom de familie",
  		"#003#" => "Toutes les entrées",
 		"#004#" => "Chercher",
-		"#010#" => "Rappèle",
+		"#010#" => "Rappele",
 		"#011#" => "Reculer",
 		"#012#" => "Fermer",
 		"#013#" => "Montrer",
