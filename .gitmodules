@@ -1,3 +1,7 @@
 [submodule "class/Zend"]
 	path = class/Zend
 	url = git://github.com/dmelo/Zend-1.11.git	
+[submodule "class/vCard"]
+	path = class/vCard
+	url = https://github.com/marcelloceschia/vCard-parser.git
+	branch = library
