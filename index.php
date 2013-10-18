@@ -82,12 +82,18 @@ if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	try{
 		$reflect = new ReflectionClass( $backendName );
 	} catch(ReflectionException $re){
-		die('pms does not exist');
+		$ciscoIPPhoneText = new CiscoIPPhoneText("missing backend", "The configured backend ".$backendName." does not exist.");
+		$xml = $ciscoIPPhoneText->toXML();
+		echo $xml;
+		die();
 	}
 	
 	/* check if we have a configuration for this */
 	if($reflect == null){
-		die('pms does not exist');
+		$ciscoIPPhoneText = new CiscoIPPhoneText("missing backend", "The configured backend ".$backendName." does not exist.");
+		$xml = $ciscoIPPhoneText->toXML();
+		echo $xml;
+		die();
 	}
 	
 	$backend = $reflect->newInstance();
@@ -116,11 +122,11 @@ if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 	/* done */
 }else{
 	/* default values */
-	$deviceName = "SEPXXXXXXX";
-	//header("HTTP/1.0 404 Not Found");
+	$deviceName = "SEPxxxx";
 	
 	$ciscoIPPhoneText = new CiscoIPPhoneText("missing device mapping", "This device does not have a valide configuration");
 	$xml = $ciscoIPPhoneText->toXML();
+	echo $xml;
 	die();
 }
 

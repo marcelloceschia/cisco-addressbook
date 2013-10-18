@@ -228,8 +228,11 @@ XMLDATA;
 
 			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/", (string)$data, $result);
 			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
-			//print_r($result);
-			$item = new PhonebookEntry($uid[1][0], $result['CONTENT'][0]);//$this->createPhonebookEntry($contacts[$i]);
+			
+			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
+			if (strlen($name) == 0){ continue; }
+			
+			@$item = new PhonebookEntry($uid[1][0], $name);//$this->createPhonebookEntry($contacts[$i]);
 			array_push($list, $item);
 		}
 
@@ -263,8 +266,10 @@ XMLDATA;
 			//preg_match_all('/^TEL;TYPE=(.[^:]*):(.*)$/msU', (string)$data, $tels);
 			preg_match_all('/TEL(;(?<PARAM>[^=]+=[^=]+))?(TYPE=(?<TYPE>.[^:]*)):(?<CONTENT>[^\\n]*)$/msU', (string)$data, $tels);
 	
+			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
+			if (strlen($name) == 0){ continue; }
 			
-			$directory = new PhonebookContact( $uid[1][0] , (string)$result['CONTENT'][0]);
+			$directory = new PhonebookContact( $uid[1][0] , $name);
 			for($i=0; $i < count($tels[1]); $i++){	
 				$directory->addContactEntry($tels['TYPE'][$i], (string) $tels['CONTENT'][$i]);
 			}
