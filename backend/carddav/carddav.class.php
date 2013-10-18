@@ -248,7 +248,7 @@ XMLDATA;
 	 */
 	private function parseEntryResponse($response, $include_vcards = true){
 		$list = array(); /* result list */
-// 		echo $response;
+		echo $response;
 
 		$xml = new SimpleXMLElement($response);
 		
@@ -264,7 +264,7 @@ XMLDATA;
 			preg_match_all("/FN(;(?<PARAM>[^=]+=[^=]+))?:(?<CONTENT>[^\\n]*)/s", (string)$data, $result);
 			preg_match_all("/UID:([^\\n]*)/s", (string)$data, $uid);
 			//preg_match_all('/^TEL;TYPE=(.[^:]*):(.*)$/msU', (string)$data, $tels);
-			preg_match_all('/TEL(;(?<PARAM>[^=]+=[^=]+))?(TYPE=(?<TYPE>.[^:]*)):(?<CONTENT>[^\\n]*)$/msU', (string)$data, $tels);
+			preg_match_all('/TEL(;(?<PARAM>[^=]+=[^=]+))*(;TYPE=(?<TYPE>.[^:]*))*:(?<CONTENT>[^\\n]*)$/msU', (string)$data, $tels);
 	
 			$name = isset($result['CONTENT'][0]) ? (string)$result['CONTENT'][0] : "";
 			if (strlen($name) == 0){ continue; }
