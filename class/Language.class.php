@@ -71,7 +71,7 @@ class Language_NL extends Language{
 		"#004#" => "Zoeken",
 		"#010#" => "Bellen",
 		"#011#" => "Teruggaan",
-		"#012#" => "Sluiten",
+		"#012#" => "Fermer",
 		"#013#" => "Tonen",
 	);
 
@@ -86,7 +86,7 @@ class Language_FR extends Language{
 		"#002#" => "Nom de familie",
  		"#003#" => "Toutes les entrées",
 		"#004#" => "Chercher",
-		"#010#" => "Rappele",
+		"#010#" => "Appeler",
 		"#011#" => "Reculer",
 		"#012#" => "Fermer",
 		"#013#" => "Montrer",
