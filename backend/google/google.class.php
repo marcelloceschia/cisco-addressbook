@@ -41,8 +41,14 @@ class Google implements Backend{
 
 
 	function getEntries($offset, $limit = null){
-
-		$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+		try {
+			$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+		} catch (Zend_Gdata_App_CaptchaRequiredException $cre) {
+  
+		} catch (Zend_Gdata_App_AuthException $ae) {
+			throw new AuthenticationException($ae->exception());
+		}
+		
 		$gdata = new Zend_Gdata($this->client);
 		$gdata->setMajorProtocolVersion(3);
 		
@@ -79,7 +85,13 @@ class Google implements Backend{
 	function getEntry($id){
 		$directory = null;
 	
-		$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+		try {
+			$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+		} catch (Zend_Gdata_App_CaptchaRequiredException $cre) {
+  
+		} catch (Zend_Gdata_App_AuthException $ae) {
+			throw new AuthenticationException($ae->exception());
+		}
 		$gdata = new Zend_Gdata($this->client);
 		$gdata->setMajorProtocolVersion(3);
 		
@@ -109,8 +121,14 @@ class Google implements Backend{
 	public function search($lastname = null, $firstname = null){
 		$list = array();
 		
+		try {
+			$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+		} catch (Zend_Gdata_App_CaptchaRequiredException $cre) {
+  
+		} catch (Zend_Gdata_App_AuthException $ae) {
+			throw new AuthenticationException($ae->exception());
+		}
 		
-		$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
 		$gdata = new Zend_Gdata($this->client);
 		$gdata->setMajorProtocolVersion(3);
 		
