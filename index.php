@@ -74,6 +74,8 @@ if (!is_writable(dirname(__FILE__)."/cache/")) {
 /* done - caching */
 
 
+//echo Linkcreator::getIndexLink("SEP123456");
+
 $manager->setCacheTemplate('pbcache', $pbCacheSettings);
 $pbcache = $manager->getCache('pbcache');
 
@@ -184,8 +186,8 @@ switch($do){
 	case "showIndex":
 		$indexEntries = new CiscoIPPhoneMenu();
 		$indexEntries->setURL($baseURI);
-		$indexEntries->addDirectoryEntry( new MenuItem("001", $lang->getEntry('#003#'), $baseURI."".$deviceName."/listAll") );
-		$indexEntries->addDirectoryEntry( new MenuItem("002", $lang->getEntry('#004#'), $baseURI."".$deviceName."/search") );
+		$indexEntries->addDirectoryEntry( new MenuItem("001", $lang->getEntry('#003#'),  Linkcreator::getListLink($deviceName) ) );
+		$indexEntries->addDirectoryEntry( new MenuItem("002", $lang->getEntry('#004#'),  Linkcreator::getSearchLink($deviceName) ) );
 
 		$xml = $indexEntries->toXML();
 		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
@@ -203,17 +205,17 @@ switch($do){
 		for($i = $offset; $i < count($entries) && $i < ($offset+$limit) ;$i++){
 			$entry = $entries[$i];
 			
-			$e = new MenuItem($entry->getId(), $entry->getName(), $baseURI."".$deviceName."/showEntry/".$entry->getId());
+			$e = new MenuItem($entry->getId(), $entry->getName(), Linkcreator::getEntryLink($deviceName, $entry->getId()) );
 			$listEntries->addDirectoryEntry($e);
 		}
 		
 		if( $offset > 0 ){
-			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Prev", $baseURI."".$deviceName."/listAll".(($offset-$limit)>0? "/" .($offset-$limit):"" ), 1 ) );
+			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Prev", Linkcreator::getListLink($deviceName, (($offset-$limit) > 0 ? ($offset-$limit): 0)  ), 1 ) );
 		}
 		
 		/* we have more entries */
 		if( count($entries) > ($offset+$limit) ){
-			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Next", $baseURI."".$deviceName."/listAll/".($offset+$limit), 2 ) );
+			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Next", Linkcreator::getListLink($deviceName, ($offset+$limit)), 2 ) );
 		}
 		
 		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#013#'), "SoftKey:Select", 3 ) );
@@ -227,7 +229,7 @@ switch($do){
 
 		if(!isset($_REQUEST['firstname']) && !isset($_REQUEST['lastname']) ){
 		      $searchInput = new CiscoIPPhoneInput("search person", "");
-		      $searchInput->setURL($baseURI."".$deviceName."/search");
+		      $searchInput->setURL(Linkcreator::getSearchLink($deviceName));
 		      $searchInput->addInputItem( new CiscoIPPhoneInputItem($lang->getEntry('#001#'), "firstname") );
 		      $searchInput->addInputItem( new CiscoIPPhoneInputItem($lang->getEntry('#002#'), "lastname") );
 		      $xml = $searchInput->toXML();
@@ -239,7 +241,7 @@ switch($do){
 		      $listEntries->setURL($baseURI);
 		      
 		      foreach($entries as $entry){
-			      $e = new MenuItem($entry->getId(), $entry->getName(), $baseURI."".$deviceName."/showEntry/".$entry->getId());
+			      $e = new MenuItem($entry->getId(), $entry->getName(), Linkcreator::getEntryLink($deviceName, $entry->getId()) );
 			      $listEntries->addDirectoryEntry($e);
 		      }
 		      $xml = $listEntries->toXML();

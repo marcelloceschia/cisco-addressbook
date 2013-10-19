@@ -54,7 +54,7 @@ XMLDATA;
 			return $this->parseListResponse($response);
 		} 
 
-		return $response;
+		return array();
 	}
 
 
@@ -85,7 +85,7 @@ XMLDATA;
 			return $this->parseEntryResponse($response);
 		}
 
-		return $list;
+		return array();
 		
 	}
 
@@ -119,7 +119,7 @@ XMLDATA;
 		}
 		
 
-		return $list;
+		return array();
 	}
 
 	public function reverseLookup($number){
