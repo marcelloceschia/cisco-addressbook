@@ -155,31 +155,37 @@ if(isset($_REQUEST['name']) && isset( $deviceMapping[ $_REQUEST['name'] ] )){
 
 switch($do){
 	case "showEntry":
-		$entry = isset($_REQUEST['entry'])?$_REQUEST['entry']:null;
-		$phonebookContactEntry = $backend->getEntry($entry);
-		if(isset($phonebookContactEntry)){
-			$contactEntries = array();
-			
-			foreach($phonebookContactEntry->getContactEntry() as $value){
-				$e = new DirectoryEntry($value['type'], $value['type'], phoneNummerCorrect($value['value']) );
-				array_push($contactEntries, $e);
-			}
-			
-			$ciscoIPPhoneDirectory = new CiscoIPPhoneDirectory($contactEntries);
-			if(strlen($phonebookContactEntry->getName()) > 32){
-				$ciscoIPPhoneDirectory->setTitle(substr($phonebookContactEntry->getName(),0,29));
-			}else{
-				$ciscoIPPhoneDirectory->setTitle($phonebookContactEntry->getName());
-			}
-			//$ciscoIPPhoneDirectory->setPrompt($phonebookContactEntry->getName());
+		try {
+			$entry = isset($_REQUEST['entry'])?$_REQUEST['entry']:null;
+			$phonebookContactEntry = $backend->getEntry($entry);
+			if(isset($phonebookContactEntry)){
+				$contactEntries = array();
+				
+				foreach($phonebookContactEntry->getContactEntry() as $value){
+					$e = new DirectoryEntry($value['type'], $value['type'], phoneNummerCorrect($value['value']) );
+					array_push($contactEntries, $e);
+				}
+				
+				$ciscoIPPhoneDirectory = new CiscoIPPhoneDirectory($contactEntries);
+				if(strlen($phonebookContactEntry->getName()) > 32){
+					$ciscoIPPhoneDirectory->setTitle(substr($phonebookContactEntry->getName(),0,29));
+				}else{
+					$ciscoIPPhoneDirectory->setTitle($phonebookContactEntry->getName());
+				}
+				//$ciscoIPPhoneDirectory->setPrompt($phonebookContactEntry->getName());
 
-			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#010#'), "SoftKey:Dial", 1 ) );
-			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 2 ) );
-			$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#012#'), "Init:Services", 3 ) );
-			
-			$xml = $ciscoIPPhoneDirectory->toXML();
-			echo mb_convert_encoding(encode($xml) , "ISO-8859-1", "UTF-8");
+				$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#010#'), "SoftKey:Dial", 1 ) );
+				$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 2 ) );
+				$ciscoIPPhoneDirectory->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#012#'), "Init:Services", 3 ) );
+				
+				$xml = $ciscoIPPhoneDirectory->toXML();
+			}
+		} catch (AuthenticationException $ae) {
+			$ciscoIPPhoneText = new CiscoIPPhoneText($lang->getEntry('#014#'), $lang->getEntry('#015#'));
+			$xml = $ciscoIPPhoneText->toXML();
 		}
+		
+		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	break;
 
 	default:
@@ -197,54 +203,66 @@ switch($do){
 		$offset = isset($_REQUEST['offset'])?$_REQUEST['offset']:0;
 		$limit = isset($_REQUEST['limit'])?$_REQUEST['limit']:15;
 //		$entries = $backend->getEntries($offset, $limit);
-		$entries = $backend->getEntries(0);
 		
-		$listEntries = new CiscoIPPhoneMenu();
-		$listEntries->setURL($baseURI);
+		try {
+			$entries = $backend->getEntries(0);
+		
+			$listEntries = new CiscoIPPhoneMenu();
+			$listEntries->setURL($baseURI);
 
-		for($i = $offset; $i < count($entries) && $i < ($offset+$limit) ;$i++){
-			$entry = $entries[$i];
+			for($i = $offset; $i < count($entries) && $i < ($offset+$limit) ;$i++){
+				$entry = $entries[$i];
+				
+				$e = new MenuItem($entry->getId(), $entry->getName(), Linkcreator::getEntryLink($deviceName, $entry->getId()) );
+				$listEntries->addDirectoryEntry($e);
+			}
 			
-			$e = new MenuItem($entry->getId(), $entry->getName(), Linkcreator::getEntryLink($deviceName, $entry->getId()) );
-			$listEntries->addDirectoryEntry($e);
+			if( $offset > 0 ){
+				$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Prev", Linkcreator::getListLink($deviceName, (($offset-$limit) > 0 ? ($offset-$limit): 0)  ), 1 ) );
+			}
+			
+			/* we have more entries */
+			if( count($entries) > ($offset+$limit) ){
+				$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Next", Linkcreator::getListLink($deviceName, ($offset+$limit)), 2 ) );
+			}
+			
+			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#013#'), "SoftKey:Select", 3 ) );
+			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 4 ) );
+			
+			$xml = $listEntries->toXML();
+			
+		} catch (AuthenticationException $ae) {
+			$ciscoIPPhoneText = new CiscoIPPhoneText($lang->getEntry('#014#'), $lang->getEntry('#015#'));
+			$xml = $ciscoIPPhoneText->toXML();
 		}
-		
-		if( $offset > 0 ){
-			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Prev", Linkcreator::getListLink($deviceName, (($offset-$limit) > 0 ? ($offset-$limit): 0)  ), 1 ) );
-		}
-		
-		/* we have more entries */
-		if( count($entries) > ($offset+$limit) ){
-			$listEntries->addSoftkey(new CiscoIPPhoneSoftkey("Next", Linkcreator::getListLink($deviceName, ($offset+$limit)), 2 ) );
-		}
-		
-		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#013#'), "SoftKey:Select", 3 ) );
-		$listEntries->addSoftkey(new CiscoIPPhoneSoftkey($lang->getEntry('#011#'), "SoftKey:Exit", 4 ) );
-		
-		$xml = $listEntries->toXML();
+
 		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	break;
 	
 	case "search":
-
-		if(!isset($_REQUEST['firstname']) && !isset($_REQUEST['lastname']) ){
-		      $searchInput = new CiscoIPPhoneInput("search person", "");
-		      $searchInput->setURL(Linkcreator::getSearchLink($deviceName));
-		      $searchInput->addInputItem( new CiscoIPPhoneInputItem($lang->getEntry('#001#'), "firstname") );
-		      $searchInput->addInputItem( new CiscoIPPhoneInputItem($lang->getEntry('#002#'), "lastname") );
-		      $xml = $searchInput->toXML();
-		}else{
-		      $firstname = isset($_REQUEST['firstname']) ? utf8_decode(urldecode($_REQUEST['firstname'])):null;
-		      $lastname = isset($_REQUEST['lastname'])   ? utf8_decode(urldecode($_REQUEST['lastname'])):null;
-		      $entries = $backend->search($lastname, $firstname);
-		      $listEntries = new CiscoIPPhoneMenu();
-		      $listEntries->setURL($baseURI);
-		      
-		      foreach($entries as $entry){
-			      $e = new MenuItem($entry->getId(), $entry->getName(), Linkcreator::getEntryLink($deviceName, $entry->getId()) );
-			      $listEntries->addDirectoryEntry($e);
-		      }
-		      $xml = $listEntries->toXML();
+		try {
+			if(!isset($_REQUEST['firstname']) && !isset($_REQUEST['lastname']) ){
+			      $searchInput = new CiscoIPPhoneInput("search person", "");
+			      $searchInput->setURL(Linkcreator::getSearchLink($deviceName));
+			      $searchInput->addInputItem( new CiscoIPPhoneInputItem($lang->getEntry('#001#'), "firstname") );
+			      $searchInput->addInputItem( new CiscoIPPhoneInputItem($lang->getEntry('#002#'), "lastname") );
+			      $xml = $searchInput->toXML();
+			}else{
+			      $firstname = isset($_REQUEST['firstname']) ? utf8_decode(urldecode($_REQUEST['firstname'])):null;
+			      $lastname = isset($_REQUEST['lastname'])   ? utf8_decode(urldecode($_REQUEST['lastname'])):null;
+			      $entries = $backend->search($lastname, $firstname);
+			      $listEntries = new CiscoIPPhoneMenu();
+			      $listEntries->setURL($baseURI);
+			      
+			      foreach($entries as $entry){
+				      $e = new MenuItem($entry->getId(), $entry->getName(), Linkcreator::getEntryLink($deviceName, $entry->getId()) );
+				      $listEntries->addDirectoryEntry($e);
+			      }
+			      $xml = $listEntries->toXML();
+			}
+		} catch (AuthenticationException $ae) {
+			$ciscoIPPhoneText = new CiscoIPPhoneText($lang->getEntry('#014#'), $lang->getEntry('#015#'));
+			$xml = $ciscoIPPhoneText->toXML();
 		}
 		echo mb_convert_encoding(encode($xml) , $deviceCharset, "UTF-8");
 	break;
