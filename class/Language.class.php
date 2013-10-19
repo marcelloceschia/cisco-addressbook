@@ -23,6 +23,8 @@ class Language{
 		"#011#" => "Back",
 		"#012#" => "Close",
 		"#013#" => "Show",
+		"#014#" => "Authentication Problem",
+		"#015#" => "Please check your authentication settings",
 	);
 
 	public static function getLocal($lang = null){
@@ -56,6 +58,8 @@ class Language_DE extends Language{
 		"#011#" => "Zurück",
 		"#012#" => "Schließen",
 		"#013#" => "Anzeigen",
+		"#014#" => "Authentication Problem",
+		"#015#" => "Please check your authentication settings",
 	);
 
 	public function  __construct() { 
@@ -73,6 +77,8 @@ class Language_NL extends Language{
 		"#011#" => "Teruggaan",
 		"#012#" => "Fermer",
 		"#013#" => "Tonen",
+		"#014#" => "Authentication Problem",
+		"#015#" => "Please check your authentication settings",
 	);
 
 	public function  __construct() { 
@@ -90,6 +96,8 @@ class Language_FR extends Language{
 		"#011#" => "Reculer",
 		"#012#" => "Fermer",
 		"#013#" => "Montrer",
+		"#014#" => "Authentication Problem",
+		"#015#" => "Please check your authentication settings",
 	);
 
 	public function  __construct() { 
