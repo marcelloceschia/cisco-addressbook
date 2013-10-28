@@ -13,6 +13,7 @@ require_once("Zend/Loader.php");
 class Google implements Backend{
 	private $username = "";
 	private $password;
+	private $token = null;
 	
 	private $client;
 
@@ -21,6 +22,7 @@ class Google implements Backend{
 	function __construct() {
 		Zend_Loader::loadClass('Zend_Gdata');
 		Zend_Loader::loadClass('Zend_Gdata_ClientLogin');
+		Zend_Loader::loadClass('Zend_Gdata_AuthSub');
 		Zend_Loader::loadClass('Zend_Http_Client');
 		Zend_Loader::loadClass('Zend_Gdata_Query');
 		Zend_Loader::loadClass('Zend_Gdata_Feed');
@@ -30,6 +32,20 @@ class Google implements Backend{
 		
 	}
 	
+	function entrySort($a, $b) {
+		if ($a == $b) {
+			return 0;
+		}
+		return ($a < $b) ? -1 : 1;
+	}
+	
+	private static function keySort($a, $b) {
+	    if (strtolower($a) == strtolower($b)) {
+		return 0;
+	    }
+	    return (strtolower($a) < strtolower($b)) ? -1 : 1;
+	}
+		
 	
 	function setUsername($username){
 		$this->username = $username;
@@ -39,10 +55,21 @@ class Google implements Backend{
 		$this->password = $password;
 	}
 
+	function setToken($token){
+		$this->token = $token;
+	}
+
 
 	function getEntries($offset, $limit = null){
 		try {
-			$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+			if ($this->token == null){
+				$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'cp');
+			}else {
+				$this->client = Zend_Gdata_AuthSub::getHttpClient($this->token);
+			}
+			
+// 			print_r($this->client);
+			//$this->client = Zend_Gdata_ClientLogin::getHttpClient($this->username, $this->password, 'xapi', null, "cisco-addressbook", null, null, "https://www.google.com/accounts/ClientLogin", 'GOOGLE');
 		} catch (Zend_Gdata_App_CaptchaRequiredException $cre) {
   
 		} catch (Zend_Gdata_App_AuthException $ae) {
@@ -57,14 +84,12 @@ class Google implements Backend{
 		$query->setParam('orderby', 'lastmodified');
 		$query->setParam('sortorder', 'descending');
 		$feed = $gdata->getFeed($query);
-	
 		$list = array();
 		
 		$i=0;
 		foreach($feed as $entry){
 		  
 		  $xml = simplexml_load_string($entry->getXML());
-		  $item = new PhonebookEntry($this->generateID($xml) , (string)$xml->name->fullName);
 
 		  $key = array();
 		  if(((string)$xml->name->familyName) != null){ $key[] = (string)$xml->name->familyName; }
@@ -72,14 +97,19 @@ class Google implements Backend{
 
 		  if(count($key) > 0){
 			$keyStr = implode(",", $key);
-			$keyStr = $i++;
+			$item = new PhonebookEntry($this->generateID($xml) , $keyStr);
 			$list[$keyStr] = $item;
 		  }
 
 		}
-		
-		ksort($list);
-		return $list;
+
+		uksort($list, "Google::keySort");
+		$i=0;
+		$sortedResultList = array();
+		foreach($list as $value){
+			$sortedResultList[$i++] = $value;
+		}
+		return $sortedResultList;
 	}
 
 	function getEntry($id){
