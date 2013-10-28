@@ -60,7 +60,7 @@ class Linkcreator {
 		if( self::isRewriteEnabled() ){
 			return self::$baseURI.$deviceName."/listAll" . ($offset > 0 ? "/".$offset : "");
 		} else {
-			return self::$baseURI."?name=".$deviceName."&amp;action=listAll" . ($offset > 0 ? "&amp;entry=".$offset : "");
+			return self::$baseURI."?name=".$deviceName."&amp;action=listAll" . ($offset > 0 ? "&amp;offset=".$offset : "");
 		}
 	}
 	
