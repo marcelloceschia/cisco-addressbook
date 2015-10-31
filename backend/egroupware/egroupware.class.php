@@ -43,7 +43,7 @@ class Egroupware implements Backend{
 
 	function getEntries($offset, $limit = null){
 		$list = array();
-		$query = "SELECT DISTINCT n_fn, contact_uid FROM egw_addressbook WHERE contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".$this->username."') ORDER BY n_family, n_given";
+		$query = "SELECT DISTINCT n_fn, contact_uid FROM egw_addressbook WHERE contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".mysql_real_escape_string($this->username)."') ORDER BY n_family, n_given";
 		
 		$result = mysql_query($query, $this->mysqlLink);
 
@@ -85,7 +85,7 @@ class Egroupware implements Backend{
 
 
 	function getEntry($id){
-		$sql = "SELECT * FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".$this->username."')) AND contact_uid = '".$id."'";
+		$sql = "SELECT * FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".mysql_real_escape_string($this->username)."')) AND contact_uid = '".mysql_real_escape_string($id)."'";
 		
 		
 		$result = mysql_query($sql, $this->mysqlLink);
@@ -107,13 +107,13 @@ class Egroupware implements Backend{
 		$list = array();
 		
 		
-		$query = "SELECT DISTINCT n_fn, contact_uid FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".$this->username."'))";
+		$query = "SELECT DISTINCT n_fn, contact_uid FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".mysql_real_escape_string($this->username)."'))";
 		
 		if(isset($lastname)){
-			$query .= " AND upper(n_family) LIKE upper('".$lastname."%')";
+			$query .= " AND upper(n_family) LIKE upper('".mysql_real_escape_string($lastname)."%')";
 		}
 		if(isset($firstname)){
-			$query .= " AND upper(n_given) LIKE upper('".$firstname."%')";
+			$query .= " AND upper(n_given) LIKE upper('".mysql_real_escape_string($firstname)."%')";
 		}
 		$query .= " ORDER BY n_family, n_given";
 
@@ -131,8 +131,9 @@ class Egroupware implements Backend{
 
 	public function reverseLookup($number){
 		
+		$number = mysql_real_escape_string($number);
 		
-		$query = "SELECT DISTINCT * FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".$this->username."'))";
+		$query = "SELECT DISTINCT * FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".mysql_real_escape_string($this->username)."'))";
 		$query .= " AND ( ";
 		$query .= " tel_work = '".$number."'";
 		$query .= " OR tel_cell  = '".$number."'";
