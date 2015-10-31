@@ -58,31 +58,6 @@ class Egroupware implements Backend{
 		return $list;
 	}
 
-// 	private function createEntry($row){
-// 		$entries = array();
-// 		
-// 
-// 		/* read contact entries */
-// 		$entryDef = array("tel_work" => "work", 
-// 				  "tel_cell" => "mobile", 
-// 				  "tel_fax" => "fax", 
-// 				  "tel_assistent" => "Assistent",
-// 				  "tel_car" => "car",
-// 				  "tel_pager" => "pager",
-// 				  "tel_home" => "home",
-// 				  "tel_fax_home" => "fax_home",
-// 				  "tel_cell_private" => "private");
-// 
-// 		foreach($entryDef as $column => $name){
-// 			if(isset($row[$column]) && !empty($row[$column])){
-// 				$entry = new DirectoryEntry( $name, $name,  utf8_decode($row[$column]) );
-// 				array_push($entries, $entry);
-// 			}
-// 		}
-// 		
-// 		return $entries;
-// 	}
-
 
 	function getEntry($id){
 		$sql = "SELECT * FROM egw_addressbook WHERE (contact_owner = '0' OR contact_owner = (SELECT account_id FROM egw_accounts WHERE account_lid = '".mysql_real_escape_string($this->username)."')) AND contact_uid = '".mysql_real_escape_string($id)."'";
